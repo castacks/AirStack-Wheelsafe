@@ -1,0 +1,86 @@
+# NVIDIA Jetpack base image for Jetson Linux 36.3 (JP 6.0). This takes the
+# l4t-base image and installs CUDA Toolkit, cuDNN, TensorRT, etc.
+ARG BASE_IMAGE=nvcr.io/nvidia/l4t-jetpack:r36.3.0
+FROM ${BASE_IMAGE}
+
+
+# First, install ROS 2 Humble. For now, just grabbed the OSRF Dockerfile for
+# ROS-Core Humble (Modified to install desktop).
+# https://github.com/osrf/docker_images/blob/9c64fd42753688dac090205df09795df1902efd9/ros/humble/ubuntu/jammy/ros-core/Dockerfile
+
+# Set Timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# install packages
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup keys
+RUN set -eux; \
+       key='C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'; \
+       export GNUPGHOME="$(mktemp -d)"; \
+       gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+       mkdir -p /usr/share/keyrings; \
+       gpg --batch --export "$key" > /usr/share/keyrings/ros2-latest-archive-keyring.gpg; \
+       gpgconf --kill all; \
+       rm -rf "$GNUPGHOME"
+
+# setup sources.list
+RUN echo "deb [ signed-by=/usr/share/keyrings/ros2-latest-archive-keyring.gpg ] http://packages.ros.org/ros2/ubuntu jammy main" > /etc/apt/sources.list.d/ros2-latest.list
+
+# setup environment
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+ENV ROS_DISTRO=humble
+
+# Install ROS 2 desktop.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # ros-humble-ros-core=0.10.0-1* \
+    ros-${ROS_DISTRO}-desktop \
+    ros-dev-tools \
+    ros-${ROS_DISTRO}-rosbag2-storage-mcap \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install helpful utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    git \
+    vim \
+    nano \
+    bash-completion \
+    tmux \ 
+    tmuxp \
+    whois \
+    net-tools \
+    silversearcher-ag \
+    && rm -rf /var/lib/apt/lists/*
+
+# NOTE: this is normally where we would look at the packages in the workspace
+# this Dockerfile corresponds with and install dependencies of the packages in
+# this workspace (according to their package.xml files). However, in this case,
+# some packages don't have these listed or have dependencies that cannot be
+# installed via ROSDEP, so we take care of those cases below.
+
+# Next, install offroad stack system dependencies (I.e., packages from apt).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    python3-requests \
+    python3-yaml \
+    python3-transforms3d \
+    python3-pyproj \
+    ros-humble-geographic-info \
+    ros-humble-grid-map \ 
+    && rm -rf /var/lib/apt/lists/*
+
+# Also install other necessary Python packages that are not available as system
+# dependencies.
+RUN pip3 install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --extra-index-url https://download.pytorch.org/whl/cu121
+RUN pip3 install ros2_numpy==0.0.2 einops fast-pytorch-kmeans gpytorch distinctipy prettytable segment_anything torch-scatter gym

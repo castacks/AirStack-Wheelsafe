@@ -1,0 +1,24 @@
+FROM arm64v8/ros:humble
+
+# Dockerfile for drive_ws for driving around the wheelchair. Runs copley node
+# and teleop-joy.
+
+# Install helpful utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    git \
+    vim \
+    nano \
+    bash-completion \
+    tmux \ 
+    tmuxp \
+    whois \
+    net-tools \
+    silversearcher-ag \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install joystick-drivers joy-linux package
+RUN apt-get update && apt-get install -y \
+    ros-humble-joy-linux \
+    && rm -rf /var/lib/apt/lists/*
