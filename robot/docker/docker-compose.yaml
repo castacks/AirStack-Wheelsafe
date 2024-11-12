@@ -8,8 +8,10 @@ services:
   # Based on compose example from the official ZED tutorials:
   # https://www.stereolabs.com/docs/docker/orchestration#docker-compose
   wheelsafe_zed:
-    image: wheelsafe_zed_test:latest
     container_name: wheelsafe_zed
+    # What image to use
+    image: wheelsafe_zed_test:latest
+    # How to build the above image if it can't be pulled / doesn't exist.
     build:
       # context: ../zed_ws
       dockerfile: ./Dockerfile.zed_ws
@@ -19,6 +21,10 @@ services:
       #   context: ./
       #   dockerfile: ./Dockerfile.zed
       # user: 1000:1000
+    entrypoint: ""
+    # we use tmux send-keys so that the session stays alive
+    command: >
+      bash -c "tmux new -d -s robot_bringup && tmux send-keys -t robot_bringup  'if [ ! -d "ros_ws/install" ]; then bws && sws; fi;'; sleep infinity"
     runtime: nvidia
     environment:
       - NVIDIA_DRIVER_CAPABILITIES=all
@@ -31,9 +37,9 @@ services:
     privileged: true
     networks:
       - airstack_network
-    ports:
-      # for ssh, starting from 2223-2243 on the host port all map to 22 in the container. Assumes no more than 21 robots
-      - "2223-2243:22"
+    # ports:
+    #   # for ssh, starting from 2223-2243 on the host port all map to 22 in the container. Assumes no more than 21 robots
+    #   - "2223-2243:22"
 
     volumes:
       # ZED stuff
@@ -53,7 +59,7 @@ services:
       # autonomy stack stuff
       # - ../../common/ros_packages:/root/ros_ws/src/common:rw # common ROS packages
       # - ../../common/ros_packages/fastdds.xml:/root/ros_ws/fastdds.xml:rw # fastdds.xml
-      - ../zed_ws:/zed_ws:rw # Mainly houses ZED wrapper package.
+      - ../zed_ws:/root/ros_ws:rw # Mainly houses ZED wrapper package.
 
   # Service for running offroad stack packages and nodes.
   wheelsafe_autonomy:

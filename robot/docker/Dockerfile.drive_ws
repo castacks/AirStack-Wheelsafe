@@ -5,17 +5,25 @@ FROM arm64v8/ros:humble
 
 # Install helpful utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    curl \
-    git \
     vim \
     nano \
-    bash-completion \
-    tmux \ 
+    wget \
+    curl \
+    tree \
+    less \
+    htop \
+    jq \
+    tmux \
     tmuxp \
-    whois \
+    python3-pip \
+    cmake \
+    build-essential \
+    gdb \
+    bash-completion \
     net-tools \
+    git \
     silversearcher-ag \
+    whois \
     && rm -rf /var/lib/apt/lists/*
 
 # Install joystick-drivers joy-linux package
