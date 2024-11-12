@@ -71,6 +71,65 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     whois \
     && rm -rf /var/lib/apt/lists/*
 
-# TODO: Install dependencies of packages in the src folder of the workspace that
-# this Dockerfile corresponds with using rosdep.
-# https://docs.ros.org/en/humble/Tutorials/Intermediate/Rosdep.html#how-do-i-use-the-rosdep-tool
+
+# SET UP INITIAL ZED WORKSPACE, INSTALL ZED WRAPPER DEPS, AND BUILD WORKSPACE.
+# FOR NOW:
+# Similar to what ZED does in their ROS Docker image, I'll copy the src repo
+# into a workspace here, install dependencies for it, build the workspace. Based
+# on
+# https://github.com/stereolabs/zed-ros2-wrapper/blob/2ec23ef97e337a134bb99d65a00ed569eb16b763/docker/Dockerfile.l4t-humble#L67-L97
+
+# THEN, when we run the container, we will mount those directories that are
+# created to host directories. The idea is that, if a folder exists on the host
+# and has files on it, that will take prescedence over the files in the image's
+# same directory.
+# https://roboticseabass.com/2023/07/09/updated-guide-docker-and-ros2/ does this
+# when they mount the ./build and ./install folders. If they're empty on the
+# host, then the image's contents are copied onto the host. Then, once they
+# already exist on the host, they will override whatever is in the image next
+# time you go to mount them.
+WORKDIR /root/ros_ws/src
+# ARG ZED_WS_SRC=../zed_ws/src
+# COPY ${ZED_WS_SRC} ./
+COPY zed_ws/src/ ./
+
+# # ZED ROS2 Wrapper dependencies version
+# ARG XACRO_VERSION=2.0.8
+# ARG DIAGNOSTICS_VERSION=3.0.0
+# ARG AMENT_LINT_VERSION=0.12.4
+# ARG GEOGRAPHIC_INFO_VERSION=1.0.4
+# ARG ROBOT_LOCALIZATION_VERSION=3.4.2
+
+# # Install missing dependencies
+# WORKDIR /root/ros_ws/src
+# RUN wget https://github.com/ros/xacro/archive/refs/tags/${XACRO_VERSION}.tar.gz -O - | tar -xvz && mv xacro-${XACRO_VERSION} xacro && \
+#     wget https://github.com/ros/diagnostics/archive/refs/tags/${DIAGNOSTICS_VERSION}.tar.gz -O - | tar -xvz && mv diagnostics-${DIAGNOSTICS_VERSION} diagnostics && \
+#     wget https://github.com/ament/ament_lint/archive/refs/tags/${AMENT_LINT_VERSION}.tar.gz -O - | tar -xvz && mv ament_lint-${AMENT_LINT_VERSION} ament-lint && \
+#     wget https://github.com/cra-ros-pkg/robot_localization/archive/refs/tags/${ROBOT_LOCALIZATION_VERSION}.tar.gz -O - | tar -xvz && mv robot_localization-${ROBOT_LOCALIZATION_VERSION} robot-localization && \
+#     wget https://github.com/ros-geographic-info/geographic_info/archive/refs/tags/${GEOGRAPHIC_INFO_VERSION}.tar.gz -O - | tar -xvz && mv geographic_info-${GEOGRAPHIC_INFO_VERSION} geographic-info && \
+#     cp -r geographic-info/geographic_msgs/ . && \
+#     rm -rf geographic-info && \
+#     git clone https://github.com/ros-drivers/nmea_msgs.git --branch ros2 && \  
+#     git clone https://github.com/ros/angles.git --branch humble-devel
+
+# Check that all the dependencies are satisfied
+WORKDIR /root/ros_ws/
+RUN apt-get update -y || true && rosdep init && rosdep update && \
+    rosdep install --from-paths src --ignore-src -r -y && \
+    rm -rf /var/lib/apt/lists/* \
+    && rm -rf /etc/ros/rosdep/sources.list.d/*
+
+# Build the dependencies and the ZED ROS2 Wrapper
+WORKDIR /root/ros_ws
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash && \
+    colcon build --parallel-workers $(nproc) --symlink-install \
+    --event-handlers console_direct+ --base-paths src \
+    --cmake-args ' -DCMAKE_BUILD_TYPE=Release' \
+    ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
+    ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"' \
+    ' --no-warn-unused-cli' "
+
+# NOTE: I didn't know this, but apparently, you maybe you can use rosdep to install python
+# packages using pip. This could be a much better alternative to just installing
+# them independently as a part of the Dockerfile.
+# https://docs.ros.org/en/independent/api/rosdep/html/rosdep_yaml_format.html

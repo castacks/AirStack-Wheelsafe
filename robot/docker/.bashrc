@@ -171,10 +171,10 @@ source /opt/ros/humble/setup.bash
 sws # source the ROS2 workspace by default
 
 container_name=$(curl -s --unix-socket /var/run/docker.sock http://localhost/containers/$HOSTNAME/json | jq -r .Name)
-CONTAINER_PREFIX="airstack-"
+CONTAINER_PREFIX="${COMPOSE_PROJECT_NAME}-"
 
 export ROBOT_NAME=$(echo "$container_name" | sed "s#/$CONTAINER_PREFIX##" | sed 's#-#_#')
-export ROS_DOMAIN_ID=$(echo "$ROBOT_NAME" | awk -F'_' '{print $NF}')
+# export ROS_DOMAIN_ID=$(echo "$ROBOT_NAME" | awk -F'_' '{print $NF}')
 
 export RCUTILS_COLORIZED_OUTPUT=1  # get colored output from ROS2 tools
 

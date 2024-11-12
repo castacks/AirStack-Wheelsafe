@@ -8,13 +8,13 @@ services:
   # Based on compose example from the official ZED tutorials:
   # https://www.stereolabs.com/docs/docker/orchestration#docker-compose
   wheelsafe_zed:
-    container_name: wheelsafe_zed
+    # container_name: wheelsafe_zed
     # What image to use
-    image: wheelsafe_zed_test:latest
+    image: wheelsafe_zed:latest
     # How to build the above image if it can't be pulled / doesn't exist.
     build:
-      # context: ../zed_ws
-      dockerfile: ./Dockerfile.zed_ws
+      context: ../
+      dockerfile: ./docker/Dockerfile.zed_ws
       # tags:
       #   - *airstack-dev-image
       # build:
@@ -59,9 +59,13 @@ services:
       # autonomy stack stuff
       # - ../../common/ros_packages:/root/ros_ws/src/common:rw # common ROS packages
       # - ../../common/ros_packages/fastdds.xml:/root/ros_ws/fastdds.xml:rw # fastdds.xml
-      - ../zed_ws:/root/ros_ws:rw # Mainly houses ZED wrapper package.
 
-  # Service for running offroad stack packages and nodes.
+      #
+
+
+      #- ../zed_ws:/root/ros_ws:rw # Mainly houses ZED wrapper package.
+
+      # Service for running offroad stack packages and nodes.
   wheelsafe_autonomy:
     image: wheelsafe_autonomy_test:latest
     container_name: wheelsafe_autonomy
