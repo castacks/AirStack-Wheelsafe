@@ -30,7 +30,12 @@ def generate_launch_description():
     ),
 
     # Publish a static transform for where the GQ7 is mounted on base_link.
-    # Unless the GQ7 is mounted exactly one meter above base_link, you should change this to be accurate to your setup
+    # Unless the GQ7 is mounted exactly one meter above base_link, you should
+    # change this to be accurate to your setup
+    # NOTE: This is the transform FROM the base_link frame TO the gq7_link
+    # frame. I.e., relative orientation from base_link frame to gq7_link frame,
+    # and subtracting the position of the gq7_link frame expressed in the
+    # baes_link frame.
     Node(
       package='tf2_ros',
       executable='static_transform_publisher',

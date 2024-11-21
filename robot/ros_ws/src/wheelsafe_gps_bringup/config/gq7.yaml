@@ -36,7 +36,7 @@ microstrain_inertial_driver:
     # Note: This configuration requires a 3DM-RTK to be connected to the aux port of the GQ7.
     #       If you do not have that device, see https://wiki.ros.org/microstrain_inertial_driver/relative_position_configuration for more options.
     filter_relative_position_config : True
-    filter_relative_position_source : 0
+    filter_relative_position_source : 2
 
     # Set the antenna offsets.
     # Note: These should be changed for you setup, otherwise dual antenna heading will not initialize.
