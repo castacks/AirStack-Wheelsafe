@@ -36,12 +36,12 @@ def generate_launch_description():
       executable='static_transform_publisher',
       output='screen',
       arguments=[
-          "--x", "0.17",
-          "--y", "0.22",
+          "--x", "-0.17",
+          "--y", "-0.22",
           "--z", "0",
-          "--roll", "180",
+          "--roll", "3.14", # 180
           "--pitch", "0",
-          "--yaw", "90",
+          "--yaw", "1.57", # 90
           "--frame-id", "base_link",
           "--child-frame-id", "gq7_link"
         ]
