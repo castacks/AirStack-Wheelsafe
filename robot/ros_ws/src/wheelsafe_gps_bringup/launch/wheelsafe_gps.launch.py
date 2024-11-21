@@ -10,8 +10,8 @@ from launch_ros.actions import Node, SetRemap
 
 # Path to the launch files and directories that we will use
 _MICROSTRAIN_LAUNCH_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_driver'), 'launch', 'microstrain_launch.py')
-_GQ7_PARAMS_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'), 'config', 'gq7', 'gq7.yml')
-_RVIZ_DISPLAY_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'), 'config', 'gq7', 'display.rviz')
+_GQ7_PARAMS_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('wheelsafe_gps_bringup'), 'config', 'gq7.yml')
+_RVIZ_DISPLAY_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('wheelsafe_gps_bringup'), 'config', 'display.rviz')
 
 def generate_launch_description():
   return LaunchDescription([
