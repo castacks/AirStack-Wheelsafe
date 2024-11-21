@@ -10,8 +10,11 @@ from launch_ros.actions import Node, SetRemap
 
 # Path to the launch files and directories that we will use
 _MICROSTRAIN_LAUNCH_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_driver'), 'launch', 'microstrain_launch.py')
-_GQ7_PARAMS_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('wheelsafe_gps_bringup'), 'config', 'gq7.yml')
+_GQ7_PARAMS_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('wheelsafe_gps_bringup'), 'config', 'gq7.yaml')
 _RVIZ_DISPLAY_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('wheelsafe_gps_bringup'), 'config', 'display.rviz')
+
+print(f"Using params file at {_GQ7_PARAMS_FILE}")
+print(f"Using rviz file at {_RVIZ_DISPLAY_FILE}")
 
 def generate_launch_description():
   return LaunchDescription([
@@ -33,12 +36,12 @@ def generate_launch_description():
       executable='static_transform_publisher',
       output='screen',
       arguments=[
-          "--x", "0",
-          "--y", "0",
+          "--x", "0.17",
+          "--y", "0.22",
           "--z", "0",
-          "--roll", "90",
+          "--roll", "180",
           "--pitch", "0",
-          "--yaw", "0",
+          "--yaw", "90",
           "--frame-id", "base_link",
           "--child-frame-id", "gq7_link"
         ]
