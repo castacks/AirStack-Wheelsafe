@@ -28,7 +28,7 @@ microstrain_inertial_driver:
 
     # Enable the RTK dongle interface for communication with the 3DM-RTK.
     # Note: Even if you do not have a 3DM-RTK connected to the aux port, this boolean can remain true
-    rtk_dongle_enable : False
+    rtk_dongle_enable : True
 
     # We will use base station relative position configuration for this example. This configuration does a couple things:
     #   We will setup a local tangent plane at the location of the RTK base station being used by the GQ7.
