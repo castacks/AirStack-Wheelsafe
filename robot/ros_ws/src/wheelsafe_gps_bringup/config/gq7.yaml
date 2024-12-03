@@ -3,6 +3,12 @@ microstrain_inertial_driver:
     # You should change this section of config to match your setup
     port : '/dev/microstrain_main'
     baudrate : 115200
+    debug: True
+
+    # Controls if the driver-defined setup is sent to the device
+    #     false - The driver will ignore the settings below and use the device's current settings
+    #     true  - Overwrite the current device settings with those listed below (default)
+    device_setup: True
 
     # This will cause the node to convert any NED measurements to ENU
     # This will also cause the node to convert any vehicle frame measurements to the ROS definition of a vehicle frame
@@ -42,8 +48,11 @@ microstrain_inertial_driver:
     # Note: These should be changed for you setup, otherwise dual antenna heading will not initialize.
     gnss1_antenna_offset : [0.51435, 0.12065, 0.0]
     gnss2_antenna_offset : [0.0, 0.12065, 0.0]
+    # gnss1_antenna_offset : [-0.2794, 0.2413, 0.0]
+    # gnss2_antenna_offset : [-0.2794, -0.2413, 0.0]
 
     # This will set the heading alignment to be dual antenna
+    # TODO: MAY HAVE TO CHANGE THIS TO 3 OR MANUALLY INITIALIZE HEADING (OR USE MAG?)
     filter_auto_heading_alignment_selector : 1
 
     # This will contain the raw IMU data, NOT the filtered IMU data
@@ -63,6 +72,7 @@ microstrain_inertial_driver:
     filter_human_readable_status_data_rate : 1
     filter_odometry_earth_data_rate        : 10
     filter_odometry_map_data_rate          : 10
+    filter_llh_position_data_rate          : 1
 
     # Turning on this will cause the transform between gq7_link and gnss_1_antenna_link/gnss_2_antenna_link to be updated from the filter
     mip_filter_multi_antenna_offset_correction_data_rate : 2
