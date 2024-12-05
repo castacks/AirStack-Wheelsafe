@@ -3,10 +3,14 @@ import math
 
 import ament_index_python
 
+import launch
 from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription, ExecuteProcess
 from launch_ros.actions import Node, SetRemap
+
+from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 # Path to the launch files and directories that we will use
 _MICROSTRAIN_LAUNCH_FILE = os.path.join(
@@ -27,13 +31,33 @@ _RVIZ_DISPLAY_FILE = os.path.join(
     "display.rviz",
 )
 
+joy_config_filepath = os.path.join(
+    ament_index_python.packages.get_package_share_directory("wheelsafe_gps_bringup"),
+    "config",
+    "logitech.yaml",
+)
+
 print(f"Using params file at {_GQ7_PARAMS_FILE}")
 print(f"Using rviz file at {_RVIZ_DISPLAY_FILE}")
+print(f"Using joy config file at {joy_config_filepath}")
+
 
 
 def generate_launch_description():
+
+    joy_dev = launch.substitutions.LaunchConfiguration('joy_dev')
+    publish_stamped_twist = launch.substitutions.LaunchConfiguration('publish_stamped_twist')
+    config_filepath = launch.substitutions.LaunchConfiguration('config_filepath')
+    deadzone = launch.substitutions.LaunchConfiguration('deadzone')
+
     return LaunchDescription(
         [
+            launch.actions.DeclareLaunchArgument('joy_vel', default_value='cmd_vel'),
+            launch.actions.DeclareLaunchArgument('joy_config', default_value='ps3'),
+            launch.actions.DeclareLaunchArgument('joy_dev', default_value='0'),
+            launch.actions.DeclareLaunchArgument('publish_stamped_twist', default_value='false'),
+            launch.actions.DeclareLaunchArgument('config_filepath', default_value=joy_config_filepath),
+            launch.actions.DeclareLaunchArgument('deadzone', default_value='0.3'),
             # Microstrain node
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
@@ -82,22 +106,18 @@ def generate_launch_description():
                 remappings=[],  # Add remappings here
                 parameters=[],  # Add parameters here
             ),
-            # TODO: Add launch action for bringing up the joy-linux node here.
             Node(
-                package="joy_linux",
-                executable="joy_linux_node",
-                output="screen",
-                remappings=[],  # Add remappings here
-                parameters=[],  # Add parameters here
-            ),
-            # TODO: Add launch action for bringing up the teleop-twist-joy node
-            # here.
+                package='joy_linux', executable='joy_linux_node', name='joy_node',
+                parameters=[{
+                    'device_id': joy_dev,
+                    'deadzone': deadzone,
+                    'autorepeat_rate': 20.0,
+            }]),
             Node(
-                package="teleop_twist_joy",
-                executable="teleop_node",
-                output="screen",
-                remappings=[],  # Add remappings here
-                parameters=[],  # Add parameters here
+                package='teleop_twist_joy', executable='teleop_node',
+                name='teleop_twist_joy_node',
+                parameters=[config_filepath, {'publish_stamped_twist': publish_stamped_twist}],
+                remappings={('/cmd_vel', launch.substitutions.LaunchConfiguration('joy_vel'))},
             ),
         ]
     )
