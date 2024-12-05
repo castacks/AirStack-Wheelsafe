@@ -7,3 +7,6 @@
 [submodule "robot/zed_ws/src/zed-ros2-wrapper"]
 	path = robot/zed_ws/src/zed-ros2-wrapper
 	url = git@github.com:stereolabs/zed-ros2-wrapper.git
+[submodule "robot/ros_ws/src/copley_ros"]
+	path = robot/ros_ws/src/copley_ros
+	url = git@github.com:castacks/copley_ros.git
