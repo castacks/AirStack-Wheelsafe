@@ -64,7 +64,11 @@ services:
 
 
       #- ../zed_ws:/root/ros_ws:rw # Mainly houses ZED wrapper package.
-
+      - ../zed_ws/src/:/root/ros_ws/src:rw
+      - ../zed_ws/build:/root_ros_ws/build:rw
+      - ../zed_ws/install:/root/ros_ws/install:rw
+      - ../zed_ws/log:/root/ros_ws/log:rw
+      
       # Service for running offroad stack packages and nodes.
   wheelsafe_autonomy:
     image: wheelsafe_autonomy_test:latest
